@@ -1,6 +1,8 @@
 package interfaz;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -22,14 +24,17 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import clases.EstadoPrestamo;
 import clases.MaterialBibliografico;
 import clases.Prestamo;
 import clases.Usuario;
 import cliente.ClienteObserver;
 import cliente.ControladorBiblioteca;
-import clases.EstadoPrestamo;
 
 public class ClienteGUI extends JFrame implements ClienteObserver {
 
@@ -94,215 +99,401 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 
 	public ClienteGUI() {
 		setTitle("Biblioteca Universitaria");
-		setSize(new Dimension(850, 600));
-		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 960, 660);
+		setResizable(false);
+		setLocationRelativeTo(null);
 
 		contentPane = new JPanel();
-		contentPane.setSize(new Dimension(850, 600));
+		contentPane.setBackground(new Color(244, 246, 249));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
+		JPanel panelEncabezado = new JPanel();
+		panelEncabezado.setBackground(new Color(28, 57, 94));
+		panelEncabezado.setBounds(0, 0, 960, 64);
+		panelEncabezado.setLayout(null);
+		contentPane.add(panelEncabezado);
+
+		JLabel lblTituloApp = new JLabel("Biblioteca Universitaria");
+		lblTituloApp.setForeground(Color.WHITE);
+		lblTituloApp.setFont(new Font("Segoe UI", Font.BOLD, 16));
+		lblTituloApp.setBounds(20, 10, 320, 24);
+		panelEncabezado.add(lblTituloApp);
+
 		lblInfoUsuario = new JLabel("Usuario: - | Multa: $0.0");
-		lblInfoUsuario.setBounds(29, 37, 440, 16);
-		contentPane.add(lblInfoUsuario);
+		lblInfoUsuario.setForeground(new Color(218, 228, 240));
+		lblInfoUsuario.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblInfoUsuario.setBounds(20, 35, 720, 20);
+		panelEncabezado.add(lblInfoUsuario);
 
 		btnCerrarSesion = new JButton("Cerrar Sesion");
-		btnCerrarSesion.setBounds(492, 33, 116, 20);
-		contentPane.add(btnCerrarSesion);
+		btnCerrarSesion.setBackground(new Color(185, 55, 55));
+		btnCerrarSesion.setForeground(Color.WHITE);
+		btnCerrarSesion.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnCerrarSesion.setFocusPainted(false);
+		btnCerrarSesion.setOpaque(true);
+		btnCerrarSesion.setBorder(new LineBorder(new Color(155, 42, 42), 1));
+		btnCerrarSesion.setBounds(794, 17, 130, 30);
+		panelEncabezado.add(btnCerrarSesion);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(10, 93, 816, 419);
+		tabbedPane.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		tabbedPane.setBackground(Color.WHITE);
+		tabbedPane.setForeground(new Color(28, 57, 94));
+		tabbedPane.setBounds(20, 80, 904, 521);
 		contentPane.add(tabbedPane);
 
 		panelCatalogo = new JPanel();
+		panelCatalogo.setBackground(Color.WHITE);
 		tabbedPane.addTab("Catalogo", null, panelCatalogo, null);
 		panelCatalogo.setLayout(null);
 
 		JLabel lblBuscar = new JLabel("Buscar:");
-		lblBuscar.setBounds(30, 29, 44, 12);
+		lblBuscar.setForeground(new Color(74, 85, 104));
+		lblBuscar.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblBuscar.setBounds(18, 17, 55, 28);
 		panelCatalogo.add(lblBuscar);
 
 		txtBuscador = new JTextField();
-		txtBuscador.setBounds(84, 26, 96, 18);
+		txtBuscador.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtBuscador.setForeground(new Color(33, 43, 54));
+		txtBuscador.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
+		txtBuscador.setBounds(78, 17, 360, 28);
 		panelCatalogo.add(txtBuscador);
 		txtBuscador.setColumns(10);
 
 		JLabel lblTipoFiltro = new JLabel("Tipo:");
-		lblTipoFiltro.setBounds(224, 29, 44, 12);
+		lblTipoFiltro.setForeground(new Color(74, 85, 104));
+		lblTipoFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblTipoFiltro.setBounds(460, 17, 42, 28);
 		panelCatalogo.add(lblTipoFiltro);
 
 		cbTipoFiltro = new JComboBox<String>();
-		cbTipoFiltro.setBounds(278, 25, 80, 20);
+		cbTipoFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		cbTipoFiltro.setBackground(Color.WHITE);
+		cbTipoFiltro.setForeground(new Color(33, 43, 54));
+		cbTipoFiltro.setBounds(506, 17, 150, 28);
 		panelCatalogo.add(cbTipoFiltro);
 
 		btnActualizarCatalogo = new JButton("Actualizar");
-		btnActualizarCatalogo.setBounds(398, 25, 123, 20);
+		btnActualizarCatalogo.setBackground(new Color(235, 240, 246));
+		btnActualizarCatalogo.setForeground(new Color(33, 43, 54));
+		btnActualizarCatalogo.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnActualizarCatalogo.setFocusPainted(false);
+		btnActualizarCatalogo.setOpaque(true);
+		btnActualizarCatalogo.setBorder(new LineBorder(new Color(195, 205, 218), 1));
+		btnActualizarCatalogo.setBounds(750, 16, 130, 30);
 		panelCatalogo.add(btnActualizarCatalogo);
 
 		JScrollPane scrollCatalogo = new JScrollPane();
-		scrollCatalogo.setBounds(10, 80, 665, 221);
+		scrollCatalogo.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		scrollCatalogo.setBounds(18, 60, 862, 362);
 		panelCatalogo.add(scrollCatalogo);
 
 		tablaCatalogo = new JTable();
 		scrollCatalogo.setViewportView(tablaCatalogo);
 
 		btnAgregarCarrito = new JButton("Agregar al Carrito");
-		btnAgregarCarrito.setBounds(10, 341, 123, 20);
+		btnAgregarCarrito.setBackground(new Color(28, 78, 128));
+		btnAgregarCarrito.setForeground(Color.WHITE);
+		btnAgregarCarrito.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnAgregarCarrito.setFocusPainted(false);
+		btnAgregarCarrito.setOpaque(true);
+		btnAgregarCarrito.setBorder(new LineBorder(new Color(20, 60, 100), 1));
+		btnAgregarCarrito.setBounds(18, 438, 170, 32);
 		panelCatalogo.add(btnAgregarCarrito);
 
 		lblSumarStock = new JLabel("Sumar Stock:");
-		lblSumarStock.setBounds(437, 343, 74, 16);
+		lblSumarStock.setForeground(new Color(74, 85, 104));
+		lblSumarStock.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblSumarStock.setBounds(524, 440, 90, 28);
 		panelCatalogo.add(lblSumarStock);
 
 		txtSumarStock = new JTextField();
-		txtSumarStock.setBounds(521, 342, 96, 18);
+		txtSumarStock.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtSumarStock.setForeground(new Color(33, 43, 54));
+		txtSumarStock.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
+		txtSumarStock.setBounds(620, 440, 90, 28);
 		panelCatalogo.add(txtSumarStock);
 		txtSumarStock.setColumns(10);
 
 		btnActualizarStock = new JButton("Actualizar Stock");
-		btnActualizarStock.setBounds(627, 341, 123, 20);
+		btnActualizarStock.setBackground(new Color(28, 78, 128));
+		btnActualizarStock.setForeground(Color.WHITE);
+		btnActualizarStock.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnActualizarStock.setFocusPainted(false);
+		btnActualizarStock.setOpaque(true);
+		btnActualizarStock.setBorder(new LineBorder(new Color(20, 60, 100), 1));
+		btnActualizarStock.setBounds(720, 438, 160, 32);
 		panelCatalogo.add(btnActualizarStock);
 
 		panelCarrito = new JPanel();
+		panelCarrito.setBackground(Color.WHITE);
 		tabbedPane.addTab("Carrito", null, panelCarrito, null);
 		panelCarrito.setLayout(null);
 
+		JLabel lblTituloCarrito = new JLabel("Materiales seleccionados para prestamo");
+		lblTituloCarrito.setForeground(new Color(28, 57, 94));
+		lblTituloCarrito.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		lblTituloCarrito.setBounds(18, 16, 400, 24);
+		panelCarrito.add(lblTituloCarrito);
+
 		JScrollPane scrollCarrito = new JScrollPane();
-		scrollCarrito.setBounds(28, 39, 531, 243);
+		scrollCarrito.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		scrollCarrito.setBounds(18, 48, 862, 374);
 		panelCarrito.add(scrollCarrito);
 
 		tablaCarrito = new JTable();
 		scrollCarrito.setViewportView(tablaCarrito);
 
 		btnQuitarCarrito = new JButton("Quitar Seleccionado");
-		btnQuitarCarrito.setBounds(32, 318, 123, 20);
+		btnQuitarCarrito.setBackground(new Color(235, 240, 246));
+		btnQuitarCarrito.setForeground(new Color(33, 43, 54));
+		btnQuitarCarrito.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnQuitarCarrito.setFocusPainted(false);
+		btnQuitarCarrito.setOpaque(true);
+		btnQuitarCarrito.setBorder(new LineBorder(new Color(195, 205, 218), 1));
+		btnQuitarCarrito.setBounds(18, 438, 170, 32);
 		panelCarrito.add(btnQuitarCarrito);
 
 		btnVaciarCarrito = new JButton("Vaciar Carrito");
-		btnVaciarCarrito.setBounds(170, 318, 110, 20);
+		btnVaciarCarrito.setBackground(new Color(235, 240, 246));
+		btnVaciarCarrito.setForeground(new Color(33, 43, 54));
+		btnVaciarCarrito.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnVaciarCarrito.setFocusPainted(false);
+		btnVaciarCarrito.setOpaque(true);
+		btnVaciarCarrito.setBorder(new LineBorder(new Color(195, 205, 218), 1));
+		btnVaciarCarrito.setBounds(200, 438, 140, 32);
 		panelCarrito.add(btnVaciarCarrito);
 
 		btnConfirmarPrestamo = new JButton("Confirmar Prestamo");
-		btnConfirmarPrestamo.setBounds(303, 318, 134, 20);
+		btnConfirmarPrestamo.setBackground(new Color(28, 78, 128));
+		btnConfirmarPrestamo.setForeground(Color.WHITE);
+		btnConfirmarPrestamo.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnConfirmarPrestamo.setFocusPainted(false);
+		btnConfirmarPrestamo.setOpaque(true);
+		btnConfirmarPrestamo.setBorder(new LineBorder(new Color(20, 60, 100), 1));
+		btnConfirmarPrestamo.setBounds(700, 438, 180, 32);
 		panelCarrito.add(btnConfirmarPrestamo);
 
 		panelPrestamos = new JPanel();
+		panelPrestamos.setBackground(Color.WHITE);
 		tabbedPane.addTab("Mis Prestamos", null, panelPrestamos, null);
 		panelPrestamos.setLayout(null);
 
+		JLabel lblTituloPrestamos = new JLabel("Historial de prestamos del usuario");
+		lblTituloPrestamos.setForeground(new Color(28, 57, 94));
+		lblTituloPrestamos.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		lblTituloPrestamos.setBounds(18, 16, 400, 24);
+		panelPrestamos.add(lblTituloPrestamos);
+
 		JScrollPane scrollPrestamos = new JScrollPane();
-		scrollPrestamos.setBounds(35, 40, 580, 243);
+		scrollPrestamos.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		scrollPrestamos.setBounds(18, 48, 862, 374);
 		panelPrestamos.add(scrollPrestamos);
 
 		tablaPrestamos = new JTable();
 		scrollPrestamos.setViewportView(tablaPrestamos);
 
 		JLabel lblDiasSimulados = new JLabel("Dias simulados:");
-		lblDiasSimulados.setBounds(35, 319, 86, 20);
+		lblDiasSimulados.setForeground(new Color(74, 85, 104));
+		lblDiasSimulados.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblDiasSimulados.setBounds(18, 440, 105, 28);
 		panelPrestamos.add(lblDiasSimulados);
 
 		txtDiasSimulados = new JTextField();
 		txtDiasSimulados.setText("0");
-		txtDiasSimulados.setBounds(111, 320, 96, 18);
+		txtDiasSimulados.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtDiasSimulados.setForeground(new Color(33, 43, 54));
+		txtDiasSimulados.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
+		txtDiasSimulados.setBounds(128, 440, 90, 28);
 		panelPrestamos.add(txtDiasSimulados);
 		txtDiasSimulados.setColumns(10);
 
 		btnDevolver = new JButton("Devolver Material");
-		btnDevolver.setBounds(252, 319, 111, 20);
+		btnDevolver.setBackground(new Color(28, 78, 128));
+		btnDevolver.setForeground(Color.WHITE);
+		btnDevolver.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnDevolver.setFocusPainted(false);
+		btnDevolver.setOpaque(true);
+		btnDevolver.setBorder(new LineBorder(new Color(20, 60, 100), 1));
+		btnDevolver.setBounds(232, 438, 170, 32);
 		panelPrestamos.add(btnDevolver);
 
 		panelAdmin = new JPanel();
+		panelAdmin.setBackground(new Color(244, 246, 249));
 		tabbedPane.addTab("Administracion", null, panelAdmin, null);
 		panelAdmin.setLayout(null);
 
+		JPanel panelNuevoMaterial = new JPanel();
+		panelNuevoMaterial.setBackground(Color.WHITE);
+		panelNuevoMaterial.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		panelNuevoMaterial.setBounds(16, 14, 330, 250);
+		panelNuevoMaterial.setLayout(null);
+		panelAdmin.add(panelNuevoMaterial);
+
+		JLabel lblNuevoMaterial = new JLabel("Agregar Nuevo Material");
+		lblNuevoMaterial.setForeground(new Color(28, 57, 94));
+		lblNuevoMaterial.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		lblNuevoMaterial.setBounds(16, 12, 298, 22);
+		panelNuevoMaterial.add(lblNuevoMaterial);
+
 		JLabel lblTipoMaterial = new JLabel("Tipo:");
-		lblTipoMaterial.setBounds(10, 10, 44, 12);
-		panelAdmin.add(lblTipoMaterial);
+		lblTipoMaterial.setForeground(new Color(74, 85, 104));
+		lblTipoMaterial.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblTipoMaterial.setBounds(16, 42, 78, 26);
+		panelNuevoMaterial.add(lblTipoMaterial);
 
 		cbTipoMaterial = new JComboBox<String>();
-		cbTipoMaterial.setBounds(64, 6, 96, 20);
-		panelAdmin.add(cbTipoMaterial);
+		cbTipoMaterial.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		cbTipoMaterial.setBackground(Color.WHITE);
+		cbTipoMaterial.setForeground(new Color(33, 43, 54));
+		cbTipoMaterial.setBounds(98, 42, 216, 26);
+		panelNuevoMaterial.add(cbTipoMaterial);
 
 		JLabel lblTitulo = new JLabel("Titulo:");
-		lblTitulo.setBounds(10, 33, 44, 12);
-		panelAdmin.add(lblTitulo);
+		lblTitulo.setForeground(new Color(74, 85, 104));
+		lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblTitulo.setBounds(16, 76, 78, 26);
+		panelNuevoMaterial.add(lblTitulo);
 
 		txtTitulo = new JTextField();
-		txtTitulo.setBounds(64, 36, 96, 18);
-		panelAdmin.add(txtTitulo);
+		txtTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtTitulo.setForeground(new Color(33, 43, 54));
+		txtTitulo.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
+		txtTitulo.setBounds(98, 76, 216, 26);
+		panelNuevoMaterial.add(txtTitulo);
 		txtTitulo.setColumns(10);
 
 		JLabel lblAutor = new JLabel("Autor:");
-		lblAutor.setBounds(10, 71, 44, 12);
-		panelAdmin.add(lblAutor);
+		lblAutor.setForeground(new Color(74, 85, 104));
+		lblAutor.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblAutor.setBounds(16, 110, 78, 26);
+		panelNuevoMaterial.add(lblAutor);
 
 		txtAutor = new JTextField();
+		txtAutor.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtAutor.setForeground(new Color(33, 43, 54));
+		txtAutor.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
 		txtAutor.setColumns(10);
-		txtAutor.setBounds(64, 68, 96, 18);
-		panelAdmin.add(txtAutor);
+		txtAutor.setBounds(98, 110, 216, 26);
+		panelNuevoMaterial.add(txtAutor);
 
 		JLabel lblCantidad = new JLabel("Cantidad:");
-		lblCantidad.setBounds(10, 104, 44, 12);
-		panelAdmin.add(lblCantidad);
+		lblCantidad.setForeground(new Color(74, 85, 104));
+		lblCantidad.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblCantidad.setBounds(16, 144, 78, 26);
+		panelNuevoMaterial.add(lblCantidad);
 
 		txtCantidad = new JTextField();
+		txtCantidad.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtCantidad.setForeground(new Color(33, 43, 54));
+		txtCantidad.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
 		txtCantidad.setColumns(10);
-		txtCantidad.setBounds(64, 101, 96, 18);
-		panelAdmin.add(txtCantidad);
+		txtCantidad.setBounds(98, 144, 216, 26);
+		panelNuevoMaterial.add(txtCantidad);
 
 		lblDatoExtra = new JLabel("Editorial:");
-		lblDatoExtra.setBounds(0, 132, 60, 12);
-		panelAdmin.add(lblDatoExtra);
+		lblDatoExtra.setForeground(new Color(74, 85, 104));
+		lblDatoExtra.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblDatoExtra.setBounds(16, 178, 78, 26);
+		panelNuevoMaterial.add(lblDatoExtra);
 
 		txtDatoExtra = new JTextField();
+		txtDatoExtra.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtDatoExtra.setForeground(new Color(33, 43, 54));
+		txtDatoExtra.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
 		txtDatoExtra.setColumns(10);
-		txtDatoExtra.setBounds(64, 129, 96, 18);
-		panelAdmin.add(txtDatoExtra);
+		txtDatoExtra.setBounds(98, 178, 216, 26);
+		panelNuevoMaterial.add(txtDatoExtra);
 
 		btnAgregarMaterial = new JButton("Agregar Material");
-		btnAgregarMaterial.setBounds(64, 171, 119, 20);
-		panelAdmin.add(btnAgregarMaterial);
+		btnAgregarMaterial.setBackground(new Color(28, 78, 128));
+		btnAgregarMaterial.setForeground(Color.WHITE);
+		btnAgregarMaterial.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnAgregarMaterial.setFocusPainted(false);
+		btnAgregarMaterial.setOpaque(true);
+		btnAgregarMaterial.setBorder(new LineBorder(new Color(20, 60, 100), 1));
+		btnAgregarMaterial.setBounds(98, 210, 216, 28);
+		panelNuevoMaterial.add(btnAgregarMaterial);
 
-		JLabel lblUsuarios = new JLabel("Usuarios:");
-		lblUsuarios.setBounds(418, 10, 44, 12);
-		panelAdmin.add(lblUsuarios);
+		JPanel panelUsuariosCard = new JPanel();
+		panelUsuariosCard.setBackground(Color.WHITE);
+		panelUsuariosCard.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		panelUsuariosCard.setBounds(360, 14, 522, 250);
+		panelUsuariosCard.setLayout(null);
+		panelAdmin.add(panelUsuariosCard);
+
+		JLabel lblUsuarios = new JLabel("Usuarios y Multas");
+		lblUsuarios.setForeground(new Color(28, 57, 94));
+		lblUsuarios.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		lblUsuarios.setBounds(16, 12, 250, 22);
+		panelUsuariosCard.add(lblUsuarios);
 
 		JScrollPane scrollUsuariosAdmin = new JScrollPane();
-		scrollUsuariosAdmin.setBounds(409, 33, 363, 135);
-		panelAdmin.add(scrollUsuariosAdmin);
+		scrollUsuariosAdmin.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		scrollUsuariosAdmin.setBounds(16, 40, 490, 158);
+		panelUsuariosCard.add(scrollUsuariosAdmin);
 
 		tablaUsuariosAdmin = new JTable();
 		scrollUsuariosAdmin.setViewportView(tablaUsuariosAdmin);
 
-		JLabel lblMontoMulta = new JLabel("Monto: ");
-		lblMontoMulta.setBounds(418, 189, 44, 12);
-		panelAdmin.add(lblMontoMulta);
+		JLabel lblMontoMulta = new JLabel("Monto:");
+		lblMontoMulta.setForeground(new Color(74, 85, 104));
+		lblMontoMulta.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		lblMontoMulta.setBounds(16, 210, 55, 26);
+		panelUsuariosCard.add(lblMontoMulta);
 
 		txtMontoMulta = new JTextField();
-		txtMontoMulta.setBounds(472, 186, 96, 18);
-		panelAdmin.add(txtMontoMulta);
+		txtMontoMulta.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+		txtMontoMulta.setForeground(new Color(33, 43, 54));
+		txtMontoMulta.setBorder(new CompoundBorder(new LineBorder(new Color(195, 205, 218), 1), new EmptyBorder(2, 8, 2, 8)));
+		txtMontoMulta.setBounds(76, 210, 130, 26);
+		panelUsuariosCard.add(txtMontoMulta);
 		txtMontoMulta.setColumns(10);
 
 		btnPagarMulta = new JButton("Pagar Multa");
-		btnPagarMulta.setBounds(588, 185, 103, 20);
-		panelAdmin.add(btnPagarMulta);
+		btnPagarMulta.setBackground(new Color(28, 78, 128));
+		btnPagarMulta.setForeground(Color.WHITE);
+		btnPagarMulta.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnPagarMulta.setFocusPainted(false);
+		btnPagarMulta.setOpaque(true);
+		btnPagarMulta.setBorder(new LineBorder(new Color(20, 60, 100), 1));
+		btnPagarMulta.setBounds(366, 208, 140, 30);
+		panelUsuariosCard.add(btnPagarMulta);
+
+		JPanel panelPrestamosCard = new JPanel();
+		panelPrestamosCard.setBackground(Color.WHITE);
+		panelPrestamosCard.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		panelPrestamosCard.setBounds(16, 278, 866, 198);
+		panelPrestamosCard.setLayout(null);
+		panelAdmin.add(panelPrestamosCard);
 
 		JLabel lblPrestamosAdmin = new JLabel("Todos los Prestamos");
-		lblPrestamosAdmin.setBounds(10, 211, 111, 12);
-		panelAdmin.add(lblPrestamosAdmin);
+		lblPrestamosAdmin.setForeground(new Color(28, 57, 94));
+		lblPrestamosAdmin.setFont(new Font("Segoe UI", Font.BOLD, 13));
+		lblPrestamosAdmin.setBounds(16, 12, 250, 24);
+		panelPrestamosCard.add(lblPrestamosAdmin);
+
+		btnActualizarAdmin = new JButton("Actualizar Datos");
+		btnActualizarAdmin.setBackground(new Color(235, 240, 246));
+		btnActualizarAdmin.setForeground(new Color(33, 43, 54));
+		btnActualizarAdmin.setFont(new Font("Segoe UI", Font.BOLD, 12));
+		btnActualizarAdmin.setFocusPainted(false);
+		btnActualizarAdmin.setOpaque(true);
+		btnActualizarAdmin.setBorder(new LineBorder(new Color(195, 205, 218), 1));
+		btnActualizarAdmin.setBounds(700, 10, 150, 28);
+		panelPrestamosCard.add(btnActualizarAdmin);
 
 		JScrollPane scrollPrestamosAdmin = new JScrollPane();
-		scrollPrestamosAdmin.setBounds(10, 233, 306, 91);
-		panelAdmin.add(scrollPrestamosAdmin);
+		scrollPrestamosAdmin.setBorder(new LineBorder(new Color(218, 224, 232), 1));
+		scrollPrestamosAdmin.setBounds(16, 44, 834, 140);
+		panelPrestamosCard.add(scrollPrestamosAdmin);
 
 		tablaPrestamosAdmin = new JTable();
 		scrollPrestamosAdmin.setViewportView(tablaPrestamosAdmin);
-
-		btnActualizarAdmin = new JButton("Actualizar Datos");
-		btnActualizarAdmin.setBounds(20, 334, 119, 20);
-		panelAdmin.add(btnActualizarAdmin);
 
 		this.listaCatalogo = new ArrayList<>();
 		this.listaCarrito = new ArrayList<>();
@@ -328,6 +519,9 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 		String[] colPrestamos = { "Material", "Prestamo", "Limite", "Devolucion", "Mora", "Estado" };
 		String[] colUsuarios = { "Nombre", "Usuario", "Rol", "Multa" };
 		String[] colPrestamosAdmin = { "Usuario", "Material", "Limite", "Mora", "Estado" };
+		JTable[] tablas = { this.tablaCatalogo, this.tablaCarrito, this.tablaPrestamos, this.tablaUsuariosAdmin, this.tablaPrestamosAdmin };
+		JTable tablaActual;
+		JTableHeader encabezado;
 
 		this.cbTipoFiltro.addItem("TODOS");
 		this.cbTipoFiltro.addItem("LIBRO");
@@ -350,11 +544,23 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 		this.tablaUsuariosAdmin.setModel(this.modeloUsuariosAdmin);
 		this.tablaPrestamosAdmin.setModel(this.modeloPrestamosAdmin);
 
-		this.tablaCatalogo.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		this.tablaCarrito.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		this.tablaPrestamos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		this.tablaUsuariosAdmin.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		this.tablaPrestamosAdmin.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		for (int ind = 0; ind < tablas.length; ind++) {
+			tablaActual = tablas[ind];
+			tablaActual.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			tablaActual.setRowHeight(25);
+			tablaActual.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+			tablaActual.setForeground(new Color(33, 43, 54));
+			tablaActual.setGridColor(new Color(230, 235, 240));
+			tablaActual.setSelectionBackground(new Color(220, 234, 248));
+			tablaActual.setSelectionForeground(new Color(28, 57, 94));
+
+			encabezado = tablaActual.getTableHeader();
+			encabezado.setBackground(new Color(235, 240, 246));
+			encabezado.setForeground(new Color(28, 57, 94));
+			encabezado.setFont(new Font("Segoe UI", Font.BOLD, 12));
+			encabezado.setPreferredSize(new Dimension(0, 28));
+			encabezado.setReorderingAllowed(false);
+		}
 	}
 
 	private DefaultTableModel crearModeloNoEditable(String[] columnas) {
@@ -628,7 +834,7 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 	}
 
 	@Override
-	public void iniciarSesionExitosa(String nombre, String rol, double multa) { {
+	public void iniciarSesionExitosa(String nombre, String rol, double multa) {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -660,7 +866,6 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 				}
 			}
 		});
-	}
 	}
 
 	@Override
