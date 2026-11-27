@@ -10,7 +10,6 @@ import java.awt.event.WindowEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -25,12 +24,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-
 import clases.MaterialBibliografico;
 import clases.Prestamo;
 import clases.Usuario;
 import cliente.ClienteObserver;
 import cliente.ControladorBiblioteca;
+import clases.EstadoPrestamo;
 
 public class ClienteGUI extends JFrame implements ClienteObserver {
 
@@ -60,7 +59,6 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 	private JTable tablaPrestamos;
 	private JTextField txtDiasSimulados;
 	private JButton btnDevolver;
-	private JButton btnActualizarPrestamos;
 
 	private JPanel panelAdmin;
 	private JComboBox<String> cbTipoMaterial;
@@ -140,7 +138,7 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 		panelCatalogo.add(cbTipoFiltro);
 
 		btnActualizarCatalogo = new JButton("Actualizar");
-		btnActualizarCatalogo.setBounds(398, 25, 84, 20);
+		btnActualizarCatalogo.setBounds(398, 25, 123, 20);
 		panelCatalogo.add(btnActualizarCatalogo);
 
 		JScrollPane scrollCatalogo = new JScrollPane();
@@ -214,10 +212,6 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 		btnDevolver = new JButton("Devolver Material");
 		btnDevolver.setBounds(252, 319, 111, 20);
 		panelPrestamos.add(btnDevolver);
-
-		btnActualizarPrestamos = new JButton("Actualizar");
-		btnActualizarPrestamos.setBounds(377, 319, 111, 20);
-		panelPrestamos.add(btnActualizarPrestamos);
 
 		panelAdmin = new JPanel();
 		tabbedPane.addTab("Administracion", null, panelAdmin, null);
@@ -535,15 +529,6 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 			}
 		});
 
-		this.btnActualizarPrestamos.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (controlador != null) {
-					controlador.cargarMisPrestamos();
-				}
-			}
-		});
-
 		this.cbTipoMaterial.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -606,7 +591,6 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 				if (controlador != null) {
 					controlador.cargarUsuariosAdmin();
 					controlador.cargarPrestamosAdmin();
-					controlador.cargarCatalogo();
 				}
 			}
 		});
@@ -619,11 +603,6 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 				}
 			}
 		});
-	}
-
-	private void actualizarEtiquetaUsuario() {
-		this.lblInfoUsuario.setText("Usuario: " + this.nombreUsuario + " (" + this.rolUsuario
-				+ ") | Multa: $" + this.multaUsuario);
 	}
 
 	private void configurarPermisosPorRol(String rol) {
@@ -649,7 +628,7 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 	}
 
 	@Override
-	public void iniciarSesionExitosa(String id, String nombre, String rol, double multa, int limitePrestamos) {
+	public void iniciarSesionExitosa(String nombre, String rol, double multa) { {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -657,7 +636,7 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 				rolUsuario = rol;
 				multaUsuario = multa;
 
-				actualizarEtiquetaUsuario();
+				lblInfoUsuario.setText("Usuario: " + nombreUsuario + " (" + rolUsuario + ") | Multa: $" + multaUsuario);
 				configurarPermisosPorRol(rol);
 				txtBuscador.setText("");
 				cbTipoFiltro.setSelectedIndex(0);
@@ -681,6 +660,7 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 				}
 			}
 		});
+	}
 	}
 
 	@Override
@@ -765,7 +745,8 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 			public void run() {
 				Prestamo prestamo;
 				MaterialBibliografico material;
-				LocalDate fechaDevolucion;
+				LocalDate fechaPrestamo, fechaLimite, fechaDevolucion;
+				EstadoPrestamo estadoActual;
 				String textoDevolucion;
 				Object[] fila;
 
@@ -775,7 +756,10 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 				for (int ind = 0; ind < listaPrestamos.size(); ind++) {
 					prestamo = listaPrestamos.get(ind);
 					material = prestamo.getMaterial();
+					fechaPrestamo = prestamo.getFechaPrestamo();
+					fechaLimite = prestamo.getFechaLimite();
 					fechaDevolucion = prestamo.getFechaDevolucion();
+					estadoActual = prestamo.getEstado();
 
 					if (fechaDevolucion == null) {
 						textoDevolucion = "-";
@@ -785,11 +769,11 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 
 					fila = new Object[6];
 					fila[0] = material.getTitulo();
-					fila[1] = prestamo.getFechaPrestamo().toString();
-					fila[2] = prestamo.getFechaLimite().toString();
+					fila[1] = fechaPrestamo.toString();
+					fila[2] = fechaLimite.toString();
 					fila[3] = textoDevolucion;
 					fila[4] = "$" + prestamo.getMoraGenerada();
-					fila[5] = prestamo.getEstado().name();
+					fila[5] = estadoActual.name();
 					modeloPrestamos.addRow(fila);
 				}
 			}
@@ -804,6 +788,8 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 				Prestamo prestamo;
 				Usuario usuario;
 				MaterialBibliografico material;
+				LocalDate fechaLimite;
+				EstadoPrestamo estadoActual;
 				Object[] fila;
 
 				listaPrestamosAdmin = prestamos;
@@ -813,13 +799,15 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 					prestamo = listaPrestamosAdmin.get(ind);
 					usuario = prestamo.getUsuario();
 					material = prestamo.getMaterial();
+					fechaLimite = prestamo.getFechaLimite();
+					estadoActual = prestamo.getEstado();
 
 					fila = new Object[5];
 					fila[0] = usuario.getNombre();
 					fila[1] = material.getTitulo();
-					fila[2] = prestamo.getFechaLimite().toString();
+					fila[2] = fechaLimite.toString();
 					fila[3] = "$" + prestamo.getMoraGenerada();
-					fila[4] = prestamo.getEstado().name();
+					fila[4] = estadoActual.name();
 					modeloPrestamosAdmin.addRow(fila);
 				}
 			}
@@ -856,7 +844,7 @@ public class ClienteGUI extends JFrame implements ClienteObserver {
 			@Override
 			public void run() {
 				multaUsuario = multaActual;
-				actualizarEtiquetaUsuario();
+				lblInfoUsuario.setText("Usuario: " + nombreUsuario + " (" + rolUsuario + ") | Multa: $" + multaUsuario);
 			}
 		});
 	}

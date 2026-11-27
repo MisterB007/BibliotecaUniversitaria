@@ -18,12 +18,11 @@ public class Prestamo implements Serializable {
 	private EstadoPrestamo estado;
 
 	public Prestamo(Usuario usuario, MaterialBibliografico material) {
-		
-		int diasPrestamo;
+
+		int diasBase, diasPrestamo;
 
 		if (usuario == null) {
 			throw new IllegalArgumentException("El usuario no puede ser nulo.");
-		
 		}
 		if (material == null) {
 			throw new IllegalArgumentException("El material no puede ser nulo.");
@@ -33,9 +32,10 @@ public class Prestamo implements Serializable {
 		this.usuario = usuario;
 		this.material = material;
 		this.fechaPrestamo = LocalDate.now();
-		
-		diasPrestamo = this.usuario.calcularDiasPrestamo(this.material.obtenerDiasPrestamoBase());
-		
+
+		diasBase = this.material.obtenerDiasPrestamoBase();
+		diasPrestamo = this.usuario.calcularDiasPrestamo(diasBase);
+
 		this.fechaLimite = this.fechaPrestamo.plusDays(diasPrestamo);
 		this.fechaDevolucion = null;
 		this.moraGenerada = 0.0;
@@ -67,32 +67,30 @@ public class Prestamo implements Serializable {
 	}
 
 	public int calcularDiasRetraso(LocalDate fechaEvaluacion) {
-		
+
 		long dias;
 
 		if (fechaEvaluacion == null) {
-			
 			return 0;
 		}
 
 		dias = ChronoUnit.DAYS.between(this.fechaLimite, fechaEvaluacion);
 		if (dias <= 0) {
-			
 			return 0;
+		} else {
+			return (int) dias;
 		}
-		
-		return (int) dias;
 	}
 
 	public double registrarDevolucion(LocalDate fechaReal) {
-		
+
 		int diasRetraso;
 		double mora;
 
 		if (this.estado == EstadoPrestamo.DEVUELTO) {
-			throw new IllegalStateException("Este prestamo ya fue devuelto anteriormente.");
+			throw new IllegalArgumentException("Este prestamo ya fue devuelto anteriormente.");
 		}
-		
+
 		if (fechaReal == null) {
 			throw new IllegalArgumentException("La fecha de devolucion no puede ser nula.");
 		}
@@ -106,7 +104,6 @@ public class Prestamo implements Serializable {
 
 		if (mora > 0) {
 			this.usuario.agregarMulta(mora);
-		
 		}
 		this.material.devolverEjemplar();
 

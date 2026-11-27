@@ -6,24 +6,23 @@ public class Libro extends MaterialBibliografico {
 	private String editorial;
 
 	public Libro(String titulo, String autor, int ejemplaresTotales, String editorial) {
-		
+
 		super(titulo, autor, ejemplaresTotales);
-		validarEditorial(editorial);
+		
+		if (editorial == null || editorial.trim().isEmpty() || editorial.contains("|") || editorial.contains(";")) {
+			throw new IllegalArgumentException("La editorial es invalida o contiene caracteres no permitidos.");
+		}
 		this.editorial = editorial.trim();
 	}
 
 	public Libro(String id, String titulo, String autor, int ejemplaresTotales, int ejemplaresDisponibles, String editorial) {
-		
-		super(id, titulo, autor, ejemplaresTotales, ejemplaresDisponibles);
-		validarEditorial(editorial);
-		this.editorial = editorial.trim();
-	}
 
-	private void validarEditorial(String editorial) {
-	
+		super(id, titulo, autor, ejemplaresTotales, ejemplaresDisponibles);
+		
 		if (editorial == null || editorial.trim().isEmpty() || editorial.contains("|") || editorial.contains(";")) {
 			throw new IllegalArgumentException("La editorial es invalida o contiene caracteres no permitidos.");
 		}
+		this.editorial = editorial.trim();
 	}
 
 	public String getEditorial() {

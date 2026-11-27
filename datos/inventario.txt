@@ -1,8 +1,9 @@
-LIBRO;412854cf-7e64-4603-81f8-c5966d958f0d;Programacion Orientada a Objetos en Java;Herbert Schildt;3;3;McGraw-Hill
+LIBRO;412854cf-7e64-4603-81f8-c5966d958f0d;Programacion Orientada a Objetos en Java;Herbert Schildt;3;2;McGraw-Hill
 LIBRO;15dcb84a-7934-4b41-b1da-0e2d74e2c4ff;Estructuras de Datos y Algoritmos;Robert Lafore;1;1;Pearson
 LIBRO;00ebd80f-0d7f-4cf5-9ee2-e353d2d5588e;Ingenieria de Software;Ian Sommerville;2;2;Addison-Wesley
-TESIS;2fa48477-6b4f-4f50-9a97-bd713ffdc850;Optimizacion de Redes Distribuidas;Luis Martinez;2;1;Ingenieria
-TESIS;d47f829a-2540-473f-b51b-2262c84842c1;Arquitectura Sostenible en el Caribe;Sofia Herrera;1;1;Arquitectura
-REVISTA;5a2e4bf4-de39-4bfa-a05e-1350fd20229b;IEEE Software;IEEE Computer Society;9;9;42
+TESIS;2fa48477-6b4f-4f50-9a97-bd713ffdc850;Optimizacion de Redes Distribuidas;Luis Martinez;2;0;Ingenieria
+TESIS;d47f829a-2540-473f-b51b-2262c84842c1;Arquitectura Sostenible en el Caribe;Sofia Herrera;1;0;Arquitectura
+REVISTA;5a2e4bf4-de39-4bfa-a05e-1350fd20229b;IEEE Software;IEEE Computer Society;9;7;42
 REVISTA;885e8295-5f08-494f-849f-027b2cbf8175;National Geographic Ciencia;NatGeo;2;2;118
 LIBRO;a8f55df3-49eb-48e2-b279-b6274a1dcf28;Edan bomaz;Crisarvi;5;5;Joseph
+REVISTA;119c1635-6225-45b9-8cfd-c7c85a78a684;odi;yo;4;4;50

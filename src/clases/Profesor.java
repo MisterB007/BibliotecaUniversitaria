@@ -6,24 +6,23 @@ public class Profesor extends Usuario {
 	private String departamento;
 
 	public Profesor(String nombre, String username, String password, String departamento) {
-	
+
 		super(nombre, username, password);
-		validarDepartamento(departamento);
-		this.departamento = departamento.trim();
-	}
-
-	public Profesor(String id, String nombre, String username, String password, double multa, String departamento) {
-		
-		super(id, nombre, username, password, multa);
-		validarDepartamento(departamento);
-		this.departamento = departamento.trim();
-	}
-
-	private void validarDepartamento(String departamento) {
 		
 		if (departamento == null || departamento.trim().isEmpty() || departamento.contains("|") || departamento.contains(";")) {
 			throw new IllegalArgumentException("El departamento es invalido.");
 		}
+		this.departamento = departamento.trim();
+	}
+
+	public Profesor(String id, String nombre, String username, String password, double multa, String departamento) {
+
+		super(id, nombre, username, password, multa);
+		
+		if (departamento == null || departamento.trim().isEmpty() || departamento.contains("|") || departamento.contains(";")) {
+			throw new IllegalArgumentException("El departamento es invalido.");
+		}
+		this.departamento = departamento.trim();
 	}
 
 	public String getDepartamento() {

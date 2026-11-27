@@ -6,24 +6,23 @@ public class Estudiante extends Usuario {
 	private String carrera;
 
 	public Estudiante(String nombre, String username, String password, String carrera) {
-	
+
 		super(nombre, username, password);
-		validarCarrera(carrera);
-		this.carrera = carrera.trim();
-	}
-
-	public Estudiante(String id, String nombre, String username, String password, double multa, String carrera) {
-		
-		super(id, nombre, username, password, multa);
-		validarCarrera(carrera);
-		this.carrera = carrera.trim();
-	}
-
-	private void validarCarrera(String carrera) {
 		
 		if (carrera == null || carrera.trim().isEmpty() || carrera.contains("|") || carrera.contains(";")) {
 			throw new IllegalArgumentException("La carrera es invalida.");
 		}
+		this.carrera = carrera.trim();
+	}
+
+	public Estudiante(String id, String nombre, String username, String password, double multa, String carrera) {
+
+		super(id, nombre, username, password, multa);
+	
+		if (carrera == null || carrera.trim().isEmpty() || carrera.contains("|") || carrera.contains(";")) {
+			throw new IllegalArgumentException("La carrera es invalida.");
+		}
+		this.carrera = carrera.trim();
 	}
 
 	public String getCarrera() {

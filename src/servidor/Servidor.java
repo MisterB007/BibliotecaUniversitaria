@@ -7,7 +7,6 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -27,18 +26,17 @@ import logica.GestorBiblioteca;
 
 // PETICION (CLIENTE -> SERVIDOR) => ACCION|arg1|arg2|...|argN
 // RESPUESTA (SERVIDOR -> CLIENTE) => ESTADO|arg1|arg2|...|argN
-// AUTH_LOGIN|username|password => OK|id|nombre|rol|multa|limitePrestamos
-// AUTH_LOGOUT => OK|desconectado
-// CATALOGO_LISTAR => OK|COLECCION|CATALOGO|cantidad  (+ List<MaterialBibliografico>)
-// CATALOGO_BUSCAR|tipo|filtro => OK|COLECCION|CATALOGO|cantidad  (+ List<MaterialBibliografico>)
-// PRESTAMO_CONFIRMAR|idMat1,idMat2,... => OK|prestamos_realizados|cantidad
-// PRESTAMO_MIS_PRESTAMOS => OK|COLECCION|PRESTAMOS|cantidad  (+ List<Prestamo>)
-// PRESTAMO_DEVOLVER|idPrestamo|diasSimulados => OK|devuelto|mora|multaActual
-// ADMIN_AGREGAR_MATERIAL|tipo|titulo|autor|cantidad|datoExtra => OK|material_agregado|titulo
-// ADMIN_ACTUALIZAR_STOCK|idMaterial|cantidadSumar => OK|stock_actualizado|disponibles|totales
-// ADMIN_LISTAR_PRESTAMOS => OK|COLECCION|PRESTAMOS_ADMIN|cantidad  (+ List<Prestamo> serializada)
-// ADMIN_LISTAR_USUARIOS => OK|COLECCION|USUARIOS_ADMIN|cantidad  (+ List<Usuario> serializada)
-// ADMIN_PAGAR_MULTA|idUsuario|monto => OK|multa_actualizada|saldoRestante
+//AUTH_LOGIN|username|password => OK|login|nombre|rol|multa
+//AUTH_LOGOUT => OK|desconectado
+//CATALOGO_BUSCAR|tipo|filtro => OK|COLECCION|CATALOGO|multaActual  (+ List<MaterialBibliografico>)
+//PRESTAMO_CONFIRMAR|idMat1,idMat2,... => OK|prestamos_realizados|cantidad
+//PRESTAMO_MIS_PRESTAMOS => OK|COLECCION|PRESTAMOS  (+ List<Prestamo>)
+//PRESTAMO_DEVOLVER|idPrestamo|diasSimulados => OK|devuelto|mora|multaActual
+//ADMIN_AGREGAR_MATERIAL|tipo|titulo|autor|cantidad|datoExtra => OK|material_agregado|titulo
+//ADMIN_ACTUALIZAR_STOCK|idMaterial|cantidadSumar => OK|stock_actualizado|disponibles|totales
+//ADMIN_LISTAR_PRESTAMOS => OK|COLECCION|PRESTAMOS_ADMIN  (+ List<Prestamo> serializada)
+//ADMIN_LISTAR_USUARIOS => OK|COLECCION|USUARIOS_ADMIN  (+ List<Usuario> serializada)
+//ADMIN_PAGAR_MULTA|idUsuario|monto => OK|multa_actualizada|saldoRestante
 // CREDENCIALES_INVALIDAS => ERROR|credenciales_invalidas
 // SESION_NO_ACTIVA => ERROR|sesion_no_activa
 // ACCESO_DENEGADO => ERROR|acceso_denegado
@@ -50,7 +48,6 @@ import logica.GestorBiblioteca;
 public class Servidor {
 
 	private static final int MAX_HILOS = 20;
-	private static final int TIEMPO_ESPERA_MS = 300000;
 
 	private int puerto;
 	private GestorBiblioteca gestor;
@@ -86,7 +83,6 @@ public class Servidor {
 
 					while (activo) {
 						socketCliente = servidor.accept();
-						socketCliente.setSoTimeout(TIEMPO_ESPERA_MS);
 						clientesConectados.add(socketCliente);
 						notificar("Cliente conectado desde: " + socketCliente.getInetAddress());
 
@@ -151,7 +147,7 @@ public class Servidor {
 		sesion.setUsuarioActual(usuario);
 		notificar("Usuario autenticado: " + usuario.getUsername() + " (" + usuario.obtenerRol() + ")");
 
-		return "OK|" + usuario.getId() + "|" + usuario.getNombre() + "|" + usuario.obtenerRol() + "|" + usuario.getMulta() + "|" + usuario.obtenerLimitePrestamos();
+		return "OK|login|" + usuario.getNombre() + "|" + usuario.obtenerRol() + "|" + usuario.getMulta();
 	}
 
 	private String procesarPrestamo(Usuario usuario, String idsTexto) {
@@ -217,8 +213,6 @@ public class Servidor {
 			return "OK|devuelto|" + mora + "|" + multaActual;
 		} catch (IllegalArgumentException e) {
 			return "ERROR|" + e.getMessage();
-		} catch (IllegalStateException e) {
-			return "ERROR|" + e.getMessage();
 		}
 	}
 
@@ -233,7 +227,8 @@ public class Servidor {
 			return "ERROR|La cantidad debe ser un numero entero valido.";
 		}
 
-		tipoNormalizado = tipo.trim().toUpperCase();
+		tipoNormalizado = tipo.trim();
+		tipoNormalizado = tipoNormalizado.toUpperCase();
 
 		try {
 			if (tipoNormalizado.equals("LIBRO")) {
@@ -347,8 +342,6 @@ public class Servidor {
 
 			} catch (EOFException e) {
 				notificar("Cliente desconectado: " + this.socket.getInetAddress());
-			} catch (SocketTimeoutException e) {
-				notificar("Tiempo de espera agotado para cliente: " + this.socket.getInetAddress());
 			} catch (SocketException e) {
 				notificar("Conexion cerrada con cliente: " + this.socket.getInetAddress());
 			} catch (Exception e) {
@@ -376,7 +369,9 @@ public class Servidor {
 			List<MaterialBibliografico> catalogo;
 			List<Prestamo> listaPrestamos;
 			List<Usuario> listaUsuarios;
-
+			Usuario usuarioActualizado;
+			double multaActual;
+			
 			if (peticion == null || peticion.trim().isEmpty()) {
 				enviarTexto(out, "ERROR|peticion_invalida");
 				return;
@@ -390,8 +385,9 @@ public class Servidor {
 				return;
 			}
 
-			accion = partes[0].trim().toUpperCase();
-
+			accion = partes[0].trim();
+			accion = accion.toUpperCase();
+			
 			if (accion.equals("AUTH_LOGIN")) {
 				if (partes.length != 3) {
 					enviarTexto(out, "ERROR|peticion_invalida");
@@ -411,26 +407,30 @@ public class Servidor {
 				notificar("Sesion cerrada: " + this.usuarioActual.getUsername());
 				this.usuarioActual = null;
 				enviarTexto(out, "OK|desconectado");
-			} else if (accion.equals("CATALOGO_LISTAR")) {
-				catalogo = gestor.buscarCatalogo("", "TODOS");
-				enviarColeccion(out, "OK|COLECCION|CATALOGO|" + catalogo.size(), catalogo);
 			} else if (accion.equals("CATALOGO_BUSCAR")) {
-				
+
 				if (partes.length < 2 || partes.length > 3) {
 					enviarTexto(out, "ERROR|peticion_invalida");
 					return;
 				}
-				
+
 				tipo = partes[1];
 				if (partes.length == 3) {
 					filtro = partes[2];
 				} else {
 					filtro = "";
 				}
-				
+
 				catalogo = gestor.buscarCatalogo(filtro, tipo);
-				enviarColeccion(out, "OK|COLECCION|CATALOGO|" + catalogo.size(), catalogo);
-			} else if (accion.equals("PRESTAMO_CONFIRMAR")) {
+				usuarioActualizado = gestor.obtenerUsuarioPorId(this.usuarioActual.getId());
+
+				if (usuarioActualizado != null) {
+					multaActual = usuarioActualizado.getMulta();
+				} else {
+					multaActual = 0.0;
+				}
+
+				enviarColeccion(out, "OK|COLECCION|CATALOGO|" + multaActual, catalogo);} else if (accion.equals("PRESTAMO_CONFIRMAR")) {
 				if (partes.length != 2) {
 					enviarTexto(out, "ERROR|peticion_invalida");
 					return;
@@ -440,7 +440,7 @@ public class Servidor {
 				enviarTexto(out, respuesta);
 			} else if (accion.equals("PRESTAMO_MIS_PRESTAMOS")) {
 				listaPrestamos = gestor.obtenerPrestamosPorUsuario(this.usuarioActual.getId());
-				enviarColeccion(out, "OK|COLECCION|PRESTAMOS|" + listaPrestamos.size(), listaPrestamos);
+				enviarColeccion(out, "OK|COLECCION|PRESTAMOS|", listaPrestamos);
 			} else if (accion.equals("PRESTAMO_DEVOLVER")) {
 				if (partes.length != 3) {
 					enviarTexto(out, "ERROR|peticion_invalida");
@@ -482,7 +482,7 @@ public class Servidor {
 				}
 				
 				listaPrestamos = gestor.obtenerTodosLosPrestamos();
-				enviarColeccion(out, "OK|COLECCION|PRESTAMOS_ADMIN|" + listaPrestamos.size(), listaPrestamos);
+				enviarColeccion(out, "OK|COLECCION|PRESTAMOS_ADMIN|", listaPrestamos);
 			} else if (accion.equals("ADMIN_LISTAR_USUARIOS")) {
 				if (!esAdministrador(this.usuarioActual)) {
 					enviarTexto(out, "ERROR|acceso_denegado");
@@ -490,7 +490,7 @@ public class Servidor {
 				}
 				
 				listaUsuarios = gestor.obtenerTodosLosUsuarios();
-				enviarColeccion(out, "OK|COLECCION|USUARIOS_ADMIN|" + listaUsuarios.size(), listaUsuarios);
+				enviarColeccion(out, "OK|COLECCION|USUARIOS_ADMIN|", listaUsuarios);
 			} else if (accion.equals("ADMIN_PAGAR_MULTA")) {
 				if (!esAdministrador(this.usuarioActual)) {
 					enviarTexto(out, "ERROR|acceso_denegado");

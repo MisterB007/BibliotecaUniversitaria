@@ -17,7 +17,6 @@ public class Cliente {
 	private int puerto;
 	private Socket socket;
 	private ObjectOutputStream out;
-	private Thread hiloEscucha;
 	private ClienteObserver observer;
 	private boolean conectado;
 
@@ -45,26 +44,26 @@ public class Cliente {
 	}
 
 	public synchronized boolean conectar() {
-		
+
+		Thread hiloEscucha;
+
 		if (estaConectado()) {
 			return true;
 		}
 
 		try {
-			
 			this.socket = new Socket(this.ip, this.puerto);
 			this.out = new ObjectOutputStream(this.socket.getOutputStream());
 			this.out.flush();
 			this.conectado = true;
 
-			this.hiloEscucha = new Thread(new Runnable() {
-			
+			hiloEscucha = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					escucharServidor();
 				}
 			});
-			this.hiloEscucha.start();
+			hiloEscucha.start();
 
 			return true;
 		} catch (IOException e) {
@@ -100,7 +99,6 @@ public class Cliente {
 	public synchronized void desconectar() {
 		
 		this.conectado = false;
-		this.hiloEscucha = null;
 
 		try {
 			if (this.out != null) {
@@ -170,20 +168,22 @@ public class Cliente {
 	}
 
 	private void procesarRespuesta(String respuesta, ObjectInputStream in) throws IOException, ClassNotFoundException {
-		
+
 		String[] partes;
-		String estado, tipoRespuesta;
+		String respuestaLimpia, estado, tipoRespuesta, cantidadTexto, titulo, disponibles, totales, saldoRestante;
 
 		if (respuesta == null || respuesta.trim().isEmpty()) {
 			return;
 		}
 
-		partes = respuesta.trim().split("\\|");
+		respuestaLimpia = respuesta.trim();
+		partes = respuestaLimpia.split("\\|");
 		if (partes.length == 0) {
 			return;
 		}
 
-		estado = partes[0].trim().toUpperCase();
+		estado = partes[0].trim();
+		estado = estado.toUpperCase();
 
 		if (estado.equals("ERROR")) {
 			procesarError(partes);
@@ -199,61 +199,89 @@ public class Cliente {
 		if (tipoRespuesta.equals("COLECCION")) {
 			procesarColeccion(partes, in);
 		} else if (tipoRespuesta.equals("desconectado")) {
-			
+			desconectar();
 			if (this.observer != null) {
 				this.observer.cerrarSesionExitosa();
 			}
 		} else if (tipoRespuesta.equals("prestamos_realizados")) {
-			procesarConfirmacionPrestamo(partes);
+			if (partes.length < 3) {
+				cantidadTexto = "";
+			} else {
+				cantidadTexto = partes[2].trim();
+			}
+			if (this.observer != null) {
+				this.observer.notificarOperacionExitosa("PRESTAMO", "Prestamo realizado con exito. Cantidad de materiales: " + cantidadTexto);
+			}
 		} else if (tipoRespuesta.equals("devuelto")) {
 			procesarConfirmacionDevolucion(partes);
 		} else if (tipoRespuesta.equals("material_agregado")) {
-			procesarMaterialAgregado(partes);
+			if (partes.length < 3) {
+				titulo = "";
+			} else {
+				titulo = partes[2].trim();
+			}
+			if (this.observer != null) {
+				this.observer.notificarOperacionExitosa("MATERIAL", "Material agregado al catalogo: " + titulo);
+			}
 		} else if (tipoRespuesta.equals("stock_actualizado")) {
-			procesarStockActualizado(partes);
+			if (partes.length >= 4) {
+				disponibles = partes[2].trim();
+				totales = partes[3].trim();
+				if (this.observer != null) {
+					this.observer.notificarOperacionExitosa("STOCK", "Stock actualizado. Ejemplares disponibles: " + disponibles + "/" + totales);
+				}
+			}
 		} else if (tipoRespuesta.equals("multa_actualizada")) {
-			procesarMultaActualizada(partes);
-		} else if (partes.length == 6) {
+			if (partes.length >= 3) {
+				saldoRestante = partes[2].trim();
+				if (this.observer != null) {
+					this.observer.notificarOperacionExitosa("MULTA", "Pago registrado. Multa restante del usuario: $" + saldoRestante);
+				}
+			}
+		} else if (tipoRespuesta.equals("login")) {
 			procesarLoginExitoso(partes);
 		}
 	}
 
 	private void procesarLoginExitoso(String[] partes) {
-		
-		String id, nombre, rol;
-		double multa;
-		int limitePrestamos;
 
-		id = partes[1].trim();
+		String nombre, rol;
+		double multa;
+
+		if (partes.length < 5) {
+			return;
+		}
+
 		nombre = partes[2].trim();
 		rol = partes[3].trim();
 
 		try {
 			multa = Double.parseDouble(partes[4].trim());
-			limitePrestamos = Integer.parseInt(partes[5].trim());
 		} catch (NumberFormatException e) {
 			notificarError("Respuesta de inicio de sesion invalida.");
 			return;
 		}
 
 		if (this.observer != null) {
-			this.observer.iniciarSesionExitosa(id, nombre, rol, multa, limitePrestamos);
+			this.observer.iniciarSesionExitosa(nombre, rol, multa);
 		}
 	}
 
 	private void procesarColeccion(String[] partes, ObjectInputStream in) throws IOException, ClassNotFoundException {
-		
+
 		String tipoColeccion;
 		Object objetoLista;
 		List<MaterialBibliografico> catalogo;
 		List<Prestamo> listaPrestamos;
 		List<Usuario> listaUsuarios;
+		double multaActual;
 
 		if (partes.length < 3) {
 			return;
 		}
 
-		tipoColeccion = partes[2].trim().toUpperCase();
+		tipoColeccion = partes[2].trim();
+		tipoColeccion = tipoColeccion.toUpperCase();
 		objetoLista = in.readObject();
 
 		if (this.observer == null) {
@@ -263,6 +291,15 @@ public class Cliente {
 		if (tipoColeccion.equals("CATALOGO")) {
 			catalogo = (List<MaterialBibliografico>) objetoLista;
 			this.observer.actualizarCatalogo(catalogo);
+
+			if (partes.length >= 4) {
+				try {
+					multaActual = Double.parseDouble(partes[3].trim());
+					this.observer.actualizarMulta(multaActual);
+				} catch (NumberFormatException e) {
+					System.out.println("Error al leer multa: " + e.getMessage());
+				}
+			}
 		} else if (tipoColeccion.equals("PRESTAMOS")) {
 			listaPrestamos = (List<Prestamo>) objetoLista;
 			this.observer.actualizarPrestamos(listaPrestamos);
@@ -272,21 +309,6 @@ public class Cliente {
 		} else if (tipoColeccion.equals("USUARIOS_ADMIN")) {
 			listaUsuarios = (List<Usuario>) objetoLista;
 			this.observer.actualizarUsuariosAdmin(listaUsuarios);
-		}
-	}
-
-	private void procesarConfirmacionPrestamo(String[] partes) {
-		
-		String cantidadTexto;
-
-		if (partes.length < 3) {
-			cantidadTexto = "";
-		} else {
-			cantidadTexto = partes[2].trim();
-		}
-
-		if (this.observer != null) {
-			this.observer.notificarOperacionExitosa("PRESTAMO", "Prestamo realizado con exito. Cantidad de materiales: " + cantidadTexto);
 		}
 	}
 
@@ -309,37 +331,6 @@ public class Cliente {
 		if (this.observer != null) {
 			this.observer.actualizarMulta(multaActual);
 			this.observer.notificarOperacionExitosa("DEVOLUCION", "Devolucion registrada correctamente. Mora generada: $" + mora);
-		}
-	}
-
-	private void procesarMaterialAgregado(String[] partes) {
-		
-		String titulo;
-
-		if (partes.length < 3) {
-			titulo = "";
-		} else {
-			titulo = partes[2].trim();
-		}
-
-		if (this.observer != null) {
-			this.observer.notificarOperacionExitosa("MATERIAL", "Material agregado al catalogo: " + titulo);
-		}
-	}
-
-	private void procesarStockActualizado(String[] partes) {
-		
-		String disponibles, totales;
-
-		if (partes.length < 4) {
-			return;
-		}
-
-		disponibles = partes[2].trim();
-		totales = partes[3].trim();
-
-		if (this.observer != null) {
-			this.observer.notificarOperacionExitosa("STOCK", "Stock actualizado. Ejemplares disponibles: " + disponibles + "/" + totales);
 		}
 	}
 

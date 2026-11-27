@@ -8,7 +8,7 @@ import clases.Usuario;
 
 public interface ClienteObserver {
 
-	public void iniciarSesionExitosa(String id, String nombre, String rol, double multa, int limitePrestamos);
+	public void iniciarSesionExitosa(String nombre, String rol, double multa);
 
 	public void cerrarSesionExitosa();
 

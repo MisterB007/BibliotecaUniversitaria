@@ -54,7 +54,7 @@ public class LoginGUI extends JFrame {
 		contentPane.add(lblPuerto);
 
 		txtPuerto = new JTextField();
-		txtPuerto.setText("5050");
+		txtPuerto.setText("7777");
 		txtPuerto.setBounds(182, 71, 96, 18);
 		contentPane.add(txtPuerto);
 		txtPuerto.setColumns(10);

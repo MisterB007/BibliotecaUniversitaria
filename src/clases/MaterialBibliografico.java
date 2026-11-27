@@ -100,19 +100,24 @@ public abstract class MaterialBibliografico implements Serializable, Prestable {
 	}
 
 	public boolean coincideConFiltro(String filtro) {
-		
-		String texto;
+
+		String texto, tituloMin, autorMin, tipoMin, detalleMin;
 
 		if (filtro == null || filtro.trim().isEmpty()) {
 			return true;
 		}
 
-		texto = filtro.trim().toLowerCase();
+		texto = filtro.trim();
+		texto = texto.toLowerCase();
+		tituloMin = this.titulo.toLowerCase();
+		autorMin = this.autor.toLowerCase();
+		tipoMin = obtenerTipoMaterial().toLowerCase();
+		detalleMin = obtenerDetalle().toLowerCase();
 
-		if (this.titulo.toLowerCase().contains(texto) || this.autor.toLowerCase().contains(texto) || obtenerTipoMaterial().toLowerCase().contains(texto) || obtenerDetalle().toLowerCase().contains(texto)) {
-		    return true;
+		if (tituloMin.contains(texto) || autorMin.contains(texto) || tipoMin.contains(texto) || detalleMin.contains(texto)) {
+			return true;
 		} else {
-		    return false;
+			return false;
 		}
 	}
 

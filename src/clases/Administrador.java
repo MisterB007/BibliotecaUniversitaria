@@ -6,24 +6,23 @@ public class Administrador extends Usuario {
 	private String codigoEmpleado;
 
 	public Administrador(String nombre, String username, String password, String codigoEmpleado) {
-	
+
 		super(nombre, username, password);
-		validarCodigoEmpleado(codigoEmpleado);
-		this.codigoEmpleado = codigoEmpleado.trim();
-	}
-
-	public Administrador(String id, String nombre, String username, String password, double multa, String codigoEmpleado) {
-		
-		super(id, nombre, username, password, multa);
-		validarCodigoEmpleado(codigoEmpleado);
-		this.codigoEmpleado = codigoEmpleado.trim();
-	}
-
-	private void validarCodigoEmpleado(String codigoEmpleado) {
 		
 		if (codigoEmpleado == null || codigoEmpleado.trim().isEmpty() || codigoEmpleado.contains("|") || codigoEmpleado.contains(";")) {
 			throw new IllegalArgumentException("El codigo de empleado es invalido.");
 		}
+		this.codigoEmpleado = codigoEmpleado.trim();
+	}
+
+	public Administrador(String id, String nombre, String username, String password, double multa, String codigoEmpleado) {
+
+		super(id, nombre, username, password, multa);
+	
+		if (codigoEmpleado == null || codigoEmpleado.trim().isEmpty() || codigoEmpleado.contains("|") || codigoEmpleado.contains(";")) {
+			throw new IllegalArgumentException("El codigo de empleado es invalido.");
+		}
+		this.codigoEmpleado = codigoEmpleado.trim();
 	}
 
 	public String getCodigoEmpleado() {

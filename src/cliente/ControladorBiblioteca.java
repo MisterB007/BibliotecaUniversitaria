@@ -56,14 +56,15 @@ public class ControladorBiblioteca {
 			return;
 		}
 
-		if (!this.cliente.estaConectado()) {
-			
-			this.cliente.configurarConexion(ipLimpia, puerto);
-			conectado = this.cliente.conectar();
-			
-			if (!conectado) {
-				return;
-			}
+		if (this.cliente.estaConectado()) {
+			this.cliente.desconectar();
+		}
+
+		this.cliente.configurarConexion(ipLimpia, puerto);
+		conectado = this.cliente.conectar();
+
+		if (!conectado) {
+			return;
 		}
 
 		this.cliente.enviarPeticion("AUTH_LOGIN|" + userLimpio + "|" + password);
@@ -88,17 +89,18 @@ public class ControladorBiblioteca {
 
 	public void cargarCatalogo() {
 		
-		this.cliente.enviarPeticion("CATALOGO_LISTAR");
+		buscarCatalogo("TODOS", "");
 	}
 
 	public void buscarCatalogo(String tipo, String filtro) {
-		
+
 		String tipoLimpio, filtroLimpio;
 
 		if (tipo == null || tipo.trim().isEmpty()) {
 			tipoLimpio = "TODOS";
 		} else {
-			tipoLimpio = tipo.trim().toUpperCase();
+			tipoLimpio = tipo.trim();
+			tipoLimpio = tipoLimpio.toUpperCase();
 		}
 
 		if (filtro == null) {
@@ -175,11 +177,6 @@ public class ControladorBiblioteca {
 		this.vista.actualizarCarrito(this.carrito);
 	}
 
-	public List<MaterialBibliografico> getCarrito() {
-		
-		return this.carrito;
-	}
-
 	public void confirmarCarrito() {
 		
 		MaterialBibliografico material;
@@ -240,29 +237,27 @@ public class ControladorBiblioteca {
 	}
 
 	public void agregarMaterialAdmin(String tipo, String titulo, String autor, String cantidadTexto, String datoExtra) {
-		
+
 		String tipoLimpio, tituloLimpio, autorLimpio, extraLimpio;
 		int cantidad, numeroEdicion;
 
 		if (tipo == null || tipo.trim().isEmpty() || titulo == null || titulo.trim().isEmpty() || autor == null || autor.trim().isEmpty() || cantidadTexto == null || cantidadTexto.trim().isEmpty() || datoExtra == null || datoExtra.trim().isEmpty()) {
-			
 			this.vista.mostrarError("Debe completar todos los campos del material.");
 			return;
 		}
 
-		tipoLimpio = tipo.trim().toUpperCase();
+		tipoLimpio = tipo.trim();
+		tipoLimpio = tipoLimpio.toUpperCase();
 		tituloLimpio = titulo.trim();
 		autorLimpio = autor.trim();
 		extraLimpio = datoExtra.trim();
 
 		if (contieneCaracterProhibido(tituloLimpio) || contieneCaracterProhibido(autorLimpio) || contieneCaracterProhibido(extraLimpio)) {
-			
 			this.vista.mostrarError("No se permiten los caracteres '|' ni ';'.");
 			return;
 		}
 
 		try {
-			
 			cantidad = Integer.parseInt(cantidadTexto.trim());
 		} catch (NumberFormatException e) {
 			this.vista.mostrarError("La cantidad debe ser un numero entero valido.");
@@ -270,23 +265,19 @@ public class ControladorBiblioteca {
 		}
 
 		if (cantidad <= 0) {
-			
 			this.vista.mostrarError("La cantidad de ejemplares debe ser mayor que cero.");
 			return;
 		}
 
 		if (tipoLimpio.equals("REVISTA")) {
-			
 			try {
-			
 				numeroEdicion = Integer.parseInt(extraLimpio);
 			} catch (NumberFormatException e) {
 				this.vista.mostrarError("El numero de edicion de la revista debe ser un numero entero.");
 				return;
 			}
-			
+
 			if (numeroEdicion <= 0) {
-				
 				this.vista.mostrarError("El numero de edicion debe ser mayor que cero.");
 				return;
 			}

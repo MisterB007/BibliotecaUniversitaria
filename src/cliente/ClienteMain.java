@@ -18,7 +18,7 @@ public class ClienteMain {
 
 				loginGUI = new LoginGUI();
 				clienteGUI = new ClienteGUI();
-				cliente = new Cliente("127.0.0.1", 5050, clienteGUI);
+				cliente = new Cliente("127.0.0.1", 7777, clienteGUI);
 				controlador = new ControladorBiblioteca(clienteGUI, cliente);
 
 				loginGUI.setControlador(controlador);

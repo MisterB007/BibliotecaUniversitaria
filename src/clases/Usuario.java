@@ -73,17 +73,25 @@ public abstract class Usuario implements Serializable {
 	public abstract String obtenerDatoExtra();
 
 	public boolean validarPassword(String clave) {
-	
+
 		if (this.password == null || clave == null) {
 			return false;
 		}
-		
-		return this.password.equals(clave);
+
+		if (this.password.equals(clave)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public boolean tieneMultaPendiente() {
-		
-		return this.multa > 0;
+
+		if (this.multa > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void agregarMulta(double monto) {
@@ -109,12 +117,16 @@ public abstract class Usuario implements Serializable {
 	}
 
 	public double calcularMoraTotal(int diasRetraso) {
-		
+
+		double moraDia, total;
+
 		if (diasRetraso <= 0) {
 			return 0.0;
+		} else {
+			moraDia = calcularMoraPorDia();
+			total = diasRetraso * moraDia;
+			return total;
 		}
-		
-		return diasRetraso * calcularMoraPorDia();
 	}
 
 	public String getId() {

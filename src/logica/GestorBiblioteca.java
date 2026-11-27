@@ -60,13 +60,6 @@ public class GestorBiblioteca {
 		cargarPrestamosDesdeArchivo();
 	}
 
-	public synchronized void guardarDatos() {
-
-		guardarUsuariosEnArchivo();
-		guardarInventarioEnArchivo();
-		guardarPrestamosEnArchivo();
-	}
-
 	public synchronized Usuario autenticarUsuario(String username, String password) {
 
 		Usuario actual;
@@ -88,10 +81,6 @@ public class GestorBiblioteca {
 		}
 
 		return null;
-	}
-
-	public synchronized List<MaterialBibliografico> buscarCatalogo(String filtro) {
-		return buscarCatalogo(filtro, "TODOS");
 	}
 
 	public synchronized List<MaterialBibliografico> buscarCatalogo(String filtro, String tipo) {
@@ -221,7 +210,7 @@ public class GestorBiblioteca {
 		Prestamo prestamo;
 		Usuario duenoPrestamo;
 		LocalDate fechaActual, fechaDevolucion;
-		String idLimpio, rolSolicitante, idDueno, idSolicitante;
+		String idLimpio, idDueno, idSolicitante;
 		double mora;
 
 		if (solicitante == null) {
@@ -240,12 +229,11 @@ public class GestorBiblioteca {
 			throw new IllegalArgumentException("Prestamo no encontrado.");
 		}
 
-		rolSolicitante = solicitante.obtenerRol();
 		duenoPrestamo = prestamo.getUsuario();
 		idDueno = duenoPrestamo.getId();
 		idSolicitante = solicitante.getId();
 
-		if (!rolSolicitante.equals("ADMINISTRADOR") && !idDueno.equals(idSolicitante)) {
+		if (!idDueno.equals(idSolicitante)) {
 			throw new IllegalArgumentException("No tiene permiso para devolver un prestamo de otro usuario.");
 		}
 
