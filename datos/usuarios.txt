@@ -1,5 +1,5 @@
 ESTUDIANTE;79367994-7d7f-4e94-a9ff-467a95d759c1;Juan Perez;estudiante1;1234;0.0;Ingenieria en Sistemas
 ESTUDIANTE;7aff22d9-d169-4dab-a4c9-c0ed725e6a18;Maria Lopez;estudiante2;1234;0.0;Arquitectura
-ESTUDIANTE;EST-MULTA-01;Carlos Ruiz;estudiante3;1234;150.0;Derecho
+ESTUDIANTE;EST-MULTA-01;Carlos Ruiz;estudiante3;1234;0.0;Derecho
 PROFESOR;a6c4dd23-64d2-4a44-a8c8-5f8f2fe2605e;Ana Gomez;profesor1;1234;0.0;Ciencias de la Computacion
 ADMINISTRADOR;afde28e1-2705-4570-9693-c48e298aec3b;Admin Biblioteca;admin;admin123;0.0;EMP-001

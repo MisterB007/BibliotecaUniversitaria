@@ -1,5 +1,7 @@
-package servidor;
+package interfaz;
 
+import servidor.Servidor;
+import servidor.ServidorObserver;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
